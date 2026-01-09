@@ -1342,7 +1342,8 @@ select_partition_for_gossip(Gossip) ->
                 message => "Unexpected grain key format in gossip",
                 grain_key => GrainKey
             }),
-            GrainRef = #{id => GrainKey, implementing_module => undefined},
+            {Id,Module} = GrainKey,
+            GrainRef = #{id => Id, implementing_module => Module},
             erleans_pm:select_partition(GrainRef)
     end.
 
