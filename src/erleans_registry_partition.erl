@@ -264,17 +264,17 @@ on_merge(PartitionName, Peer) ->
 
 
 %% Legacy callback functions - required for behavior completeness but not used with callback_args
-send(_Peer, _Message) ->
+send(Peer, Message) ->
     %% Not called when using callback_args, but required by behavior
-    ok.
+    partisan_gen_server:cast({?MODULE, Peer}, {crdt_message, Message}).
 
-broadcast(_Gossip) ->
+broadcast(Gossip) ->
     %% Not called when using callback_args, but required by behavior
-    ok.
+    partisan:broadcast(Gossip, ?MODULE).
 
-on_merge(_Peer) ->
+on_merge(Peer) ->
     %% Not called when using callback_args, but required by behavior
-    ok.
+    partisan_gen_server:cast(?MODULE, {crdt_on_merge, Peer}).
 
 
 
@@ -1342,8 +1342,7 @@ select_partition_for_gossip(Gossip) ->
                 message => "Unexpected grain key format in gossip",
                 grain_key => GrainKey
             }),
-            {Id,Module} = GrainKey,
-            GrainRef = #{id => Id, implementing_module => Module},
+            GrainRef = #{id => GrainKey, implementing_module => undefined},
             erleans_pm:select_partition(GrainRef)
     end.
 
